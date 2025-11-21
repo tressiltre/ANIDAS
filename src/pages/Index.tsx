@@ -5,6 +5,10 @@ import { AlertsTable, Alert } from "@/components/Dashboard/AlertsTable";
 import { AlertDetailDialog } from "@/components/Dashboard/AlertDetailDialog";
 import { AlertChart } from "@/components/Dashboard/AlertChart";
 import { SearchBar } from "@/components/Dashboard/SearchBar";
+import { GeographicMap } from "@/components/Dashboard/GeographicMap";
+import { ProtocolBreakdown } from "@/components/Dashboard/ProtocolBreakdown";
+import { ThreatTimeline } from "@/components/Dashboard/ThreatTimeline";
+import { SystemHealth } from "@/components/Dashboard/SystemHealth";
 import { Shield, AlertTriangle, Activity, TrendingUp } from "lucide-react";
 import { generateMockAlerts, generateChartData, generateProtocolData } from "@/utils/mockData";
 import { toast } from "sonner";
@@ -58,7 +62,6 @@ const Index = () => {
   };
 
   const handleExport = () => {
-    // Convert filtered alerts to CSV
     const headers = ["Timestamp", "Severity", "Signature", "Source IP", "Dest IP", "Protocol", "Category"];
     const rows = filteredAlerts.map((alert) => [
       alert.timestamp,
@@ -85,13 +88,17 @@ const Index = () => {
     toast.success("Alerts exported successfully!");
   };
 
+  const handleRefresh = () => {
+    toast.success("Dashboard refreshed successfully!");
+  };
+
   return (
     <div className="min-h-screen bg-background">
-      <DashboardHeader />
+      <DashboardHeader onRefresh={handleRefresh} />
 
-      <main className="container mx-auto px-6 py-8">
+      <main className="container mx-auto px-6 py-8 space-y-8">
         {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatsCard
             title="Total Alerts"
             value={stats.total}
@@ -118,32 +125,51 @@ const Index = () => {
           />
         </div>
 
-        {/* Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <AlertChart data={chartData} type="line" title="Alert Trends (Last 12 Hours)" />
           <AlertChart data={chartData} type="bar" title="Alert Distribution by Severity" />
         </div>
 
-        {/* Alerts Table Section */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-foreground">Recent Alerts</h2>
-            <p className="text-sm text-muted-foreground">
-              Showing {filteredAlerts.length} of {alerts.length} alerts
-            </p>
+        {/* Analytics Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-1">
+            <ProtocolBreakdown />
           </div>
+          <div className="lg:col-span-1">
+            <GeographicMap />
+          </div>
+          <div className="lg:col-span-1">
+            <SystemHealth />
+          </div>
+        </div>
 
-          <SearchBar
-            searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
-            severityFilter={severityFilter}
-            onSeverityChange={setSeverityFilter}
-            protocolFilter={protocolFilter}
-            onProtocolChange={setProtocolFilter}
-            onExport={handleExport}
-          />
+        {/* Timeline and Alerts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-1">
+            <ThreatTimeline />
+          </div>
+          
+          <div className="lg:col-span-2 space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-foreground">Recent Alerts</h2>
+              <p className="text-sm text-muted-foreground">
+                Showing {filteredAlerts.length} of {alerts.length} alerts
+              </p>
+            </div>
 
-          <AlertsTable alerts={filteredAlerts} onViewDetails={handleViewDetails} />
+            <SearchBar
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
+              severityFilter={severityFilter}
+              onSeverityChange={setSeverityFilter}
+              protocolFilter={protocolFilter}
+              onProtocolChange={setProtocolFilter}
+              onExport={handleExport}
+            />
+
+            <AlertsTable alerts={filteredAlerts} onViewDetails={handleViewDetails} />
+          </div>
         </div>
       </main>
 
