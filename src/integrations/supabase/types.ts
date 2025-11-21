@@ -14,7 +14,110 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      alerts: {
+        Row: {
+          category: string
+          created_at: string | null
+          dest_ip: string
+          dest_port: number | null
+          id: string
+          metadata: Json | null
+          payload: string | null
+          protocol: string
+          severity: string
+          signature: string
+          source_ip: string
+          src_port: number | null
+          timestamp: string
+          updated_at: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          dest_ip: string
+          dest_port?: number | null
+          id?: string
+          metadata?: Json | null
+          payload?: string | null
+          protocol: string
+          severity: string
+          signature: string
+          source_ip: string
+          src_port?: number | null
+          timestamp?: string
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          dest_ip?: string
+          dest_port?: number | null
+          id?: string
+          metadata?: Json | null
+          payload?: string | null
+          protocol?: string
+          severity?: string
+          signature?: string
+          source_ip?: string
+          src_port?: number | null
+          timestamp?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      investigation_notes: {
+        Row: {
+          alert_id: string | null
+          created_at: string | null
+          id: string
+          note: string
+          user_id: string | null
+        }
+        Insert: {
+          alert_id?: string | null
+          created_at?: string | null
+          id?: string
+          note: string
+          user_id?: string | null
+        }
+        Update: {
+          alert_id?: string | null
+          created_at?: string | null
+          id?: string
+          note?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "investigation_notes_alert_id_fkey"
+            columns: ["alert_id"]
+            isOneToOne: false
+            referencedRelation: "alerts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      system_config: {
+        Row: {
+          id: string
+          key: string
+          updated_at: string | null
+          value: Json
+        }
+        Insert: {
+          id?: string
+          key: string
+          updated_at?: string | null
+          value: Json
+        }
+        Update: {
+          id?: string
+          key?: string
+          updated_at?: string | null
+          value?: Json
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
