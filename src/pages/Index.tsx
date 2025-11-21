@@ -1,4 +1,7 @@
 import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { useRealtimeAlerts } from "@/hooks/useRealtimeAlerts";
 import { DashboardHeader } from "@/components/Dashboard/DashboardHeader";
 import { StatsCard } from "@/components/Dashboard/StatsCard";
 import { AlertsTable, Alert } from "@/components/Dashboard/AlertsTable";
@@ -9,12 +12,15 @@ import { GeographicMap } from "@/components/Dashboard/GeographicMap";
 import { ProtocolBreakdown } from "@/components/Dashboard/ProtocolBreakdown";
 import { ThreatTimeline } from "@/components/Dashboard/ThreatTimeline";
 import { SystemHealth } from "@/components/Dashboard/SystemHealth";
-import { Shield, AlertTriangle, Activity, TrendingUp } from "lucide-react";
-import { generateMockAlerts, generateChartData, generateProtocolData } from "@/utils/mockData";
+import { Shield, AlertTriangle, Activity, TrendingUp, LogOut } from "lucide-react";
+import { generateChartData } from "@/utils/mockData";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 const Index = () => {
-  const [alerts] = useState<Alert[]>(generateMockAlerts());
+  const { signOut } = useAuth();
+  const navigate = useNavigate();
+  const { alerts, loading } = useRealtimeAlerts();
   const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -22,7 +28,6 @@ const Index = () => {
   const [protocolFilter, setProtocolFilter] = useState("all");
 
   const chartData = generateChartData();
-  const protocolData = generateProtocolData();
 
   // Filter alerts based on search and filters
   const filteredAlerts = useMemo(() => {
@@ -92,9 +97,33 @@ const Index = () => {
     toast.success("Dashboard refreshed successfully!");
   };
 
+  const handleSignOut = async () => {
+    await signOut();
+    toast.success("Signed out successfully!");
+    navigate("/auth");
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading alerts...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <DashboardHeader onRefresh={handleRefresh} />
+      
+      <div className="container mx-auto px-6 py-4 flex justify-end">
+        <Button onClick={handleSignOut} variant="outline" className="gap-2">
+          <LogOut className="h-4 w-4" />
+          Sign Out
+        </Button>
+      </div>
 
       <main className="container mx-auto px-6 py-8 space-y-8">
         {/* Statistics Cards */}
