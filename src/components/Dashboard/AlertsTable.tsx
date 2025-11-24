@@ -7,28 +7,18 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-
-export interface Alert {
-  id: string;
-  timestamp: string;
-  severity: "critical" | "high" | "medium" | "low";
-  signature: string;
-  sourceIp: string;
-  destIp: string;
-  protocol: string;
-  category: string;
-}
+import type { DashboardAlert } from "@/hooks/useRealtimeAlerts";
 
 interface AlertsTableProps {
-  alerts: Alert[];
-  onAlertClick: (alert: Alert) => void;
+  alerts: DashboardAlert[];
+  onAlertClick: (alert: DashboardAlert) => void;
 }
 
-const severityColors = {
-  critical: "bg-red-500",
-  high: "bg-orange-500",
-  medium: "bg-yellow-500",
-  low: "bg-blue-500",
+const severityColors: Record<string, string> = {
+  critical: "bg-critical text-critical-foreground",
+  high: "bg-high text-high-foreground",
+  medium: "bg-medium text-medium-foreground",
+  low: "bg-low text-low-foreground",
 };
 
 export const AlertsTable = ({ alerts, onAlertClick }: AlertsTableProps) => {
@@ -64,7 +54,7 @@ export const AlertsTable = ({ alerts, onAlertClick }: AlertsTableProps) => {
                   {alert.timestamp}
                 </TableCell>
                 <TableCell>
-                  <Badge className={severityColors[alert.severity]}>
+                  <Badge className={severityColors[alert.severity] || "bg-muted"}>
                     {alert.severity}
                   </Badge>
                 </TableCell>

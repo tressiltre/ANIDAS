@@ -6,18 +6,18 @@ interface ProtocolBreakdownProps {
 }
 
 const COLORS = [
-  "hsl(var(--chart-1))",
-  "hsl(var(--chart-2))",
-  "hsl(var(--chart-3))",
-  "hsl(var(--chart-4))",
-  "hsl(var(--chart-5))",
+  "hsl(var(--primary))",
+  "hsl(var(--info))",
+  "hsl(var(--success))",
+  "hsl(var(--warning))",
+  "hsl(var(--muted))",
 ];
 
 export const ProtocolBreakdown = ({ data }: ProtocolBreakdownProps) => {
   return (
-    <Card>
+    <Card className="border-border/50 bg-card/50 backdrop-blur">
       <CardHeader>
-        <CardTitle>Protocol Distribution</CardTitle>
+        <CardTitle className="text-foreground">Protocol Distribution</CardTitle>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
@@ -27,17 +27,30 @@ export const ProtocolBreakdown = ({ data }: ProtocolBreakdownProps) => {
               cx="50%"
               cy="50%"
               labelLine={false}
-              label={(entry) => entry.name}
-              outerRadius={80}
+              label={(entry) => `${entry.name}: ${entry.value}`}
+              outerRadius={90}
               fill="#8884d8"
               dataKey="value"
+              stroke="hsl(var(--background))"
+              strokeWidth={2}
             >
               {data.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
               ))}
             </Pie>
-            <Tooltip />
-            <Legend />
+            <Tooltip 
+              contentStyle={{ 
+                backgroundColor: 'hsl(var(--popover))',
+                border: '1px solid hsl(var(--border))',
+                borderRadius: '8px',
+                color: 'hsl(var(--popover-foreground))'
+              }}
+            />
+            <Legend 
+              wrapperStyle={{ 
+                color: 'hsl(var(--foreground))' 
+              }}
+            />
           </PieChart>
         </ResponsiveContainer>
       </CardContent>

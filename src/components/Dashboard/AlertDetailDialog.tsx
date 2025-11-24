@@ -4,11 +4,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Alert } from "./AlertsTable";
 import { Badge } from "@/components/ui/badge";
+import type { DashboardAlert } from "@/hooks/useRealtimeAlerts";
 
 interface AlertDetailDialogProps {
-  alert: Alert | null;
+  alert: DashboardAlert | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
