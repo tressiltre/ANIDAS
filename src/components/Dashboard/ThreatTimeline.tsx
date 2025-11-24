@@ -1,9 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert } from "./AlertsTable";
 import { Badge } from "@/components/ui/badge";
+import type { DashboardAlert } from "@/hooks/useRealtimeAlerts";
 
 interface ThreatTimelineProps {
-  alerts: Alert[];
+  alerts: DashboardAlert[];
 }
 
 export const ThreatTimeline = ({ alerts }: ThreatTimelineProps) => {

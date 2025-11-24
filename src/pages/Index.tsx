@@ -1,10 +1,10 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth.tsx";
-import { useRealtimeAlerts } from "@/hooks/useRealtimeAlerts.tsx";
+import { useAuth } from "@/hooks/useAuth";
+import { useRealtimeAlerts, type DashboardAlert } from "@/hooks/useRealtimeAlerts";
 import { DashboardHeader } from "@/components/Dashboard/DashboardHeader";
 import { StatsCard } from "@/components/Dashboard/StatsCard";
-import { AlertsTable, Alert } from "@/components/Dashboard/AlertsTable";
+import { AlertsTable } from "@/components/Dashboard/AlertsTable";
 import { AlertDetailDialog } from "@/components/Dashboard/AlertDetailDialog";
 import { AlertChart } from "@/components/Dashboard/AlertChart";
 import { SearchBar } from "@/components/Dashboard/SearchBar";
@@ -13,21 +13,50 @@ import { ProtocolBreakdown } from "@/components/Dashboard/ProtocolBreakdown";
 import { ThreatTimeline } from "@/components/Dashboard/ThreatTimeline";
 import { SystemHealth } from "@/components/Dashboard/SystemHealth";
 import { Shield, AlertTriangle, Activity, TrendingUp } from "lucide-react";
-import { generateChartData, generateProtocolData } from "@/utils/mockData";
 import { toast } from "sonner";
 
 const Index = () => {
   const { signOut } = useAuth();
   const navigate = useNavigate();
   const { alerts, loading } = useRealtimeAlerts();
-  const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
+  const [selectedAlert, setSelectedAlert] = useState<DashboardAlert | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [severityFilter, setSeverityFilter] = useState("all");
   const [protocolFilter, setProtocolFilter] = useState("all");
+  const [chartData, setChartData] = useState<Array<{ time: string; count: number }>>([]);
+  const [protocolData, setProtocolData] = useState<Array<{ name: string; value: number }>>([]);
 
-  const chartData = generateChartData();
-  const protocolData = generateProtocolData();
+  // Generate chart data from real alerts
+  useEffect(() => {
+    if (alerts.length === 0) return;
+
+    // Generate hourly chart data for last 24 hours
+    const hours = Array.from({ length: 24 }, (_, i) => {
+      const hour = i.toString().padStart(2, "0");
+      const hourAlerts = alerts.filter(alert => {
+        const alertHour = new Date(alert.timestamp).getHours();
+        return alertHour === i;
+      });
+      return {
+        time: `${hour}:00`,
+        count: hourAlerts.length,
+      };
+    });
+    setChartData(hours);
+
+    // Generate protocol distribution data
+    const protocolCounts = alerts.reduce((acc, alert) => {
+      acc[alert.protocol] = (acc[alert.protocol] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    const protocolDistribution = Object.entries(protocolCounts).map(([name, value]) => ({
+      name,
+      value,
+    }));
+    setProtocolData(protocolDistribution);
+  }, [alerts]);
 
   // Filter alerts based on search and filters
   const filteredAlerts = useMemo(() => {
@@ -61,7 +90,7 @@ const Index = () => {
     };
   }, [alerts]);
 
-  const handleAlertClick = (alert: Alert) => {
+  const handleAlertClick = (alert: DashboardAlert) => {
     setSelectedAlert(alert);
     setDialogOpen(true);
   };

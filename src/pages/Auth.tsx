@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { Session } from "@supabase/supabase-js";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,25 +13,42 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [session, setSession] = useState<Session | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Mock session check - will be replaced with real Supabase auth
-    const mockSession = localStorage.getItem("mock_session");
-    if (mockSession) {
-      setSession(JSON.parse(mockSession));
-      navigate("/");
-    }
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        navigate("/");
+      }
+    });
+
+    // Listen for auth state changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        navigate("/");
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, [navigate]);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    // Mock signup - store credentials
-    localStorage.setItem("mock_credentials", JSON.stringify({ email, password }));
-    toast.success("Account created! You can now sign in.");
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success("Account created! You can now sign in.");
+    }
     
     setLoading(false);
   };
@@ -40,21 +57,18 @@ const Auth = () => {
     e.preventDefault();
     setLoading(true);
 
-    // Mock signin - check credentials
-    const stored = localStorage.getItem("mock_credentials");
-    if (stored) {
-      const creds = JSON.parse(stored);
-      if (creds.email === email && creds.password === password) {
-        const mockSession = { user: { id: "mock-user", email } } as Session;
-        localStorage.setItem("mock_session", JSON.stringify(mockSession));
-        toast.success("Signed in successfully!");
-        navigate("/");
-      } else {
-        toast.error("Invalid credentials");
-      }
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      toast.error(error.message);
     } else {
-      toast.error("No account found. Please sign up first.");
+      toast.success("Signed in successfully!");
+      navigate("/");
     }
+    
     setLoading(false);
   };
 
