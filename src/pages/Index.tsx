@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
-import { useRealtimeAlerts } from "@/hooks/useRealtimeAlerts";
+import { useAuth } from "@/hooks/useAuth.tsx";
+import { useRealtimeAlerts } from "@/hooks/useRealtimeAlerts.tsx";
 import { DashboardHeader } from "@/components/Dashboard/DashboardHeader";
 import { StatsCard } from "@/components/Dashboard/StatsCard";
 import { AlertsTable, Alert } from "@/components/Dashboard/AlertsTable";
@@ -12,10 +12,9 @@ import { GeographicMap } from "@/components/Dashboard/GeographicMap";
 import { ProtocolBreakdown } from "@/components/Dashboard/ProtocolBreakdown";
 import { ThreatTimeline } from "@/components/Dashboard/ThreatTimeline";
 import { SystemHealth } from "@/components/Dashboard/SystemHealth";
-import { Shield, AlertTriangle, Activity, TrendingUp, LogOut } from "lucide-react";
-import { generateChartData } from "@/utils/mockData";
+import { Shield, AlertTriangle, Activity, TrendingUp } from "lucide-react";
+import { generateChartData, generateProtocolData } from "@/utils/mockData";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
 
 const Index = () => {
   const { signOut } = useAuth();
@@ -28,6 +27,7 @@ const Index = () => {
   const [protocolFilter, setProtocolFilter] = useState("all");
 
   const chartData = generateChartData();
+  const protocolData = generateProtocolData();
 
   // Filter alerts based on search and filters
   const filteredAlerts = useMemo(() => {
@@ -61,7 +61,7 @@ const Index = () => {
     };
   }, [alerts]);
 
-  const handleViewDetails = (alert: Alert) => {
+  const handleAlertClick = (alert: Alert) => {
     setSelectedAlert(alert);
     setDialogOpen(true);
   };
@@ -93,10 +93,6 @@ const Index = () => {
     toast.success("Alerts exported successfully!");
   };
 
-  const handleRefresh = () => {
-    toast.success("Dashboard refreshed successfully!");
-  };
-
   const handleSignOut = async () => {
     await signOut();
     toast.success("Signed out successfully!");
@@ -116,14 +112,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <DashboardHeader onRefresh={handleRefresh} />
-      
-      <div className="container mx-auto px-6 py-4 flex justify-end">
-        <Button onClick={handleSignOut} variant="outline" className="gap-2">
-          <LogOut className="h-4 w-4" />
-          Sign Out
-        </Button>
-      </div>
+      <DashboardHeader onSignOut={handleSignOut} />
 
       <main className="container mx-auto px-6 py-8 space-y-8">
         {/* Statistics Cards */}
@@ -138,13 +127,11 @@ const Index = () => {
             title="Critical Alerts"
             value={stats.critical}
             icon={AlertTriangle}
-            severity="critical"
           />
           <StatsCard
             title="High Priority"
             value={stats.high}
             icon={Activity}
-            severity="high"
           />
           <StatsCard
             title="Active Threats"
@@ -156,27 +143,20 @@ const Index = () => {
 
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <AlertChart data={chartData} type="line" title="Alert Trends (Last 12 Hours)" />
-          <AlertChart data={chartData} type="bar" title="Alert Distribution by Severity" />
+          <AlertChart data={chartData} />
+          <ProtocolBreakdown data={protocolData} />
         </div>
 
         {/* Analytics Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-1">
-            <ProtocolBreakdown />
-          </div>
-          <div className="lg:col-span-1">
-            <GeographicMap />
-          </div>
-          <div className="lg:col-span-1">
-            <SystemHealth />
-          </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <GeographicMap />
+          <SystemHealth />
         </div>
 
         {/* Timeline and Alerts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-1">
-            <ThreatTimeline />
+            <ThreatTimeline alerts={alerts.slice(0, 5)} />
           </div>
           
           <div className="lg:col-span-2 space-y-4">
@@ -188,16 +168,12 @@ const Index = () => {
             </div>
 
             <SearchBar
-              searchTerm={searchTerm}
-              onSearchChange={setSearchTerm}
-              severityFilter={severityFilter}
-              onSeverityChange={setSeverityFilter}
-              protocolFilter={protocolFilter}
-              onProtocolChange={setProtocolFilter}
-              onExport={handleExport}
+              value={searchTerm}
+              onChange={setSearchTerm}
+              placeholder="Search by IP, signature, or category..."
             />
 
-            <AlertsTable alerts={filteredAlerts} onViewDetails={handleViewDetails} />
+            <AlertsTable alerts={filteredAlerts} onAlertClick={handleAlertClick} />
           </div>
         </div>
       </main>

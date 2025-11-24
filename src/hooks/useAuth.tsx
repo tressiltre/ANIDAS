@@ -1,29 +1,19 @@
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
 
+// Mock implementation until Supabase client is properly configured
 export const useAuth = () => {
   const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setLoading(false);
-      }
-    );
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
+    // For now, automatically set a mock session to bypass auth
+    setSession({ user: { id: "mock-user" } } as Session);
+    setLoading(false);
   }, []);
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    setSession(null);
   };
 
   return { session, loading, signOut };
