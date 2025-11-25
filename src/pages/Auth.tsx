@@ -78,13 +78,15 @@ const Auth = () => {
         <CardHeader className="space-y-4">
           <div className="flex items-center justify-center gap-3 mb-4">
             <div className="relative">
-              <Shield className="h-12 w-12 text-primary" />
-              <Radar className="h-6 w-6 text-primary absolute -bottom-1 -right-1 animate-pulse" />
+              <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center" style={{ boxShadow: 'var(--shadow-neon)' }}>
+                <Shield className="h-7 w-7 text-background" strokeWidth={2.5} />
+              </div>
+              <Radar className="h-5 w-5 text-accent absolute -bottom-1 -right-1 animate-pulse" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold">ANIDAS</h1>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">ANIDAS</h1>
               <p className="text-xs text-muted-foreground">
-                Network Intrusion Detection & Response
+                AI Network Intrusion Detection & Analysis
               </p>
             </div>
           </div>
