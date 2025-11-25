@@ -1,19 +1,27 @@
-import { LucideIcon } from "lucide-react";
+import { ReactNode } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 
 interface StatsCardProps {
   title: string;
   value: string | number;
-  icon: LucideIcon;
+  icon: ReactNode;
+  variant?: "critical" | "high" | "medium" | "low";
   trend?: {
     value: number;
     isPositive: boolean;
   };
 }
 
-export const StatsCard = ({ title, value, icon: Icon, trend }: StatsCardProps) => {
+export const StatsCard = ({ title, value, icon, variant, trend }: StatsCardProps) => {
+  const variantStyles = {
+    critical: "border-critical/30 bg-critical/5",
+    high: "border-high/30 bg-high/5",
+    medium: "border-medium/30 bg-medium/5",
+    low: "border-low/30 bg-low/5",
+  };
+
   return (
-    <Card>
+    <Card className={variant ? variantStyles[variant] : ""}>
       <CardContent className="p-6">
         <div className="flex items-center justify-between">
           <div>
@@ -22,14 +30,14 @@ export const StatsCard = ({ title, value, icon: Icon, trend }: StatsCardProps) =
             {trend && (
               <p
                 className={`text-xs mt-1 ${
-                  trend.isPositive ? "text-green-600" : "text-red-600"
+                  trend.isPositive ? "text-success" : "text-critical"
                 }`}
               >
                 {trend.isPositive ? "↑" : "↓"} {Math.abs(trend.value)}%
               </p>
             )}
           </div>
-          <Icon className="h-8 w-8 text-muted-foreground" />
+          <div className="text-muted-foreground">{icon}</div>
         </div>
       </CardContent>
     </Card>

@@ -12,7 +12,9 @@ import { GeographicMap } from "@/components/Dashboard/GeographicMap";
 import { ProtocolBreakdown } from "@/components/Dashboard/ProtocolBreakdown";
 import { ThreatTimeline } from "@/components/Dashboard/ThreatTimeline";
 import { SystemHealth } from "@/components/Dashboard/SystemHealth";
-import { Shield, AlertTriangle, Activity, TrendingUp } from "lucide-react";
+import { ExportPanel } from "@/components/Dashboard/ExportPanel";
+import { AIInsightsPanel } from "@/components/Dashboard/AIInsightsPanel";
+import { Shield, AlertTriangle, Activity, Eye } from "lucide-react";
 import { toast } from "sonner";
 
 const Index = () => {
@@ -95,31 +97,51 @@ const Index = () => {
     setDialogOpen(true);
   };
 
-  const handleExport = () => {
-    const headers = ["Timestamp", "Severity", "Signature", "Source IP", "Dest IP", "Protocol", "Category"];
-    const rows = filteredAlerts.map((alert) => [
-      alert.timestamp,
+  // Export alerts to CSV
+  const exportToCSV = () => {
+    const headers = ["Time", "Severity", "Category", "Source IP", "Dest IP", "Protocol", "Signature"];
+    const rows = filteredAlerts.map(alert => [
+      new Date(alert.timestamp).toLocaleString(),
       alert.severity,
-      alert.signature,
+      alert.category,
       alert.sourceIp,
       alert.destIp,
       alert.protocol,
-      alert.category,
+      alert.signature
     ]);
-
-    const csvContent = [
+    
+    const csv = [
       headers.join(","),
-      ...rows.map((row) => row.map((cell) => `"${cell}"`).join(",")),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(","))
     ].join("\n");
-
-    const blob = new Blob([csvContent], { type: "text/csv" });
+    
+    const blob = new Blob([csv], { type: "text/csv" });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `anidas-alerts-${new Date().toISOString()}.csv`;
+    a.download = `anidas-alerts-${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
+    window.URL.revokeObjectURL(url);
+    toast.success("Alerts exported to CSV");
+  };
+
+  // Export alerts to JSON
+  const exportToJSON = () => {
+    const data = {
+      exportDate: new Date().toISOString(),
+      totalAlerts: filteredAlerts.length,
+      alerts: filteredAlerts
+    };
     
-    toast.success("Alerts exported successfully!");
+    const json = JSON.stringify(data, null, 2);
+    const blob = new Blob([json], { type: "application/json" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `anidas-alerts-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    toast.success("Alerts exported to JSON");
   };
 
   const handleSignOut = async () => {
@@ -145,64 +167,63 @@ const Index = () => {
 
       <main className="container mx-auto px-6 py-8 space-y-8">
         {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           <StatsCard
             title="Total Alerts"
-            value={stats.total}
-            icon={Shield}
+            value={alerts.length}
+            icon={<Shield className="h-4 w-4" />}
             trend={{ value: 12, isPositive: false }}
           />
           <StatsCard
-            title="Critical Alerts"
-            value={stats.critical}
-            icon={AlertTriangle}
+            title="Critical Threats"
+            value={alerts.filter((a) => a.severity === "critical").length}
+            icon={<AlertTriangle className="h-4 w-4" />}
+            variant="critical"
           />
           <StatsCard
             title="High Priority"
-            value={stats.high}
-            icon={Activity}
+            value={alerts.filter((a) => a.severity === "high").length}
+            icon={<Activity className="h-4 w-4" />}
+            variant="high"
           />
           <StatsCard
-            title="Active Threats"
-            value={stats.critical + stats.high}
-            icon={TrendingUp}
-            trend={{ value: 8, isPositive: false }}
+            title="Active Monitoring"
+            value={alerts.filter((a) => a.severity === "critical" || a.severity === "high").length}
+            icon={<Eye className="h-4 w-4" />}
+            variant="high"
           />
         </div>
 
-        {/* Charts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <AlertChart data={chartData} />
-          <ProtocolBreakdown data={protocolData} />
-        </div>
-
-        {/* Analytics Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <GeographicMap />
-          <SystemHealth />
-        </div>
-
-        {/* Timeline and Alerts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-1">
-            <ThreatTimeline alerts={alerts.slice(0, 5)} />
-          </div>
-          
-          <div className="lg:col-span-2 space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-foreground">Recent Alerts</h2>
-              <p className="text-sm text-muted-foreground">
-                Showing {filteredAlerts.length} of {alerts.length} alerts
-              </p>
-            </div>
-
+        {/* Main Content Grid */}
+        <div className="grid gap-6 lg:grid-cols-3">
+          <div className="lg:col-span-2 space-y-6">
             <SearchBar
               value={searchTerm}
               onChange={setSearchTerm}
               placeholder="Search by IP, signature, or category..."
             />
-
-            <AlertsTable alerts={filteredAlerts} onAlertClick={handleAlertClick} />
+            <AlertChart data={chartData} />
+            <AlertsTable 
+              alerts={filteredAlerts} 
+              onAlertClick={handleAlertClick}
+            />
+          </div>
+          
+          <div className="space-y-6">
+            <AIInsightsPanel 
+              totalAlerts={alerts.length}
+              criticalCount={alerts.filter(a => a.severity === "critical").length}
+              topThreat={alerts.length > 0 ? alerts[0].category : "None"}
+            />
+            <ExportPanel 
+              onExportCSV={exportToCSV}
+              onExportJSON={exportToJSON}
+              totalAlerts={filteredAlerts.length}
+            />
+            <ProtocolBreakdown data={protocolData} />
+            <GeographicMap />
+            <ThreatTimeline alerts={alerts.slice(0, 5)} />
+            <SystemHealth />
           </div>
         </div>
       </main>

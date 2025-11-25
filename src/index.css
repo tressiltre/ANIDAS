@@ -8,27 +8,27 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Cybersecurity Dashboard - Dark Theme Primary */
-    --background: 222 47% 7%;
-    --foreground: 210 40% 98%;
+    /* ANIDAS - Advanced Cybersecurity Theme */
+    --background: 220 50% 5%;
+    --foreground: 180 100% 95%;
 
-    --card: 222 47% 10%;
-    --card-foreground: 210 40% 98%;
+    --card: 220 45% 8%;
+    --card-foreground: 180 100% 95%;
 
-    --popover: 222 47% 10%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 220 45% 8%;
+    --popover-foreground: 180 100% 95%;
 
-    /* Cyan accent for tech aesthetic */
-    --primary: 189 94% 43%;
-    --primary-foreground: 0 0% 100%;
+    /* Electric cyan-blue primary for high-tech feel */
+    --primary: 180 100% 50%;
+    --primary-foreground: 220 50% 5%;
 
-    --secondary: 217 33% 17%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 240 30% 15%;
+    --secondary-foreground: 180 100% 95%;
 
-    --muted: 217 33% 15%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 240 25% 12%;
+    --muted-foreground: 210 15% 60%;
 
-    --accent: 189 94% 43%;
+    --accent: 280 85% 55%;
     --accent-foreground: 0 0% 100%;
 
     /* Alert severity colors */
@@ -74,12 +74,14 @@ All colors MUST be HSL.
     --info-foreground: 0 0% 100%;
 
     /* Gradients for visual effects */
-    --gradient-primary: linear-gradient(135deg, hsl(189 94% 43%), hsl(217 91% 60%));
+    --gradient-primary: linear-gradient(135deg, hsl(180 100% 50%), hsl(280 85% 55%));
     --gradient-danger: linear-gradient(135deg, hsl(0 84% 60%), hsl(25 95% 53%));
+    --gradient-cyber: linear-gradient(180deg, hsl(180 100% 50% / 0.15), transparent);
     
     /* Shadows with glow effect */
-    --shadow-glow: 0 0 20px hsl(189 94% 43% / 0.3);
-    --shadow-card: 0 4px 6px -1px hsl(0 0% 0% / 0.3), 0 2px 4px -1px hsl(0 0% 0% / 0.2);
+    --shadow-glow: 0 0 30px hsl(180 100% 50% / 0.4);
+    --shadow-card: 0 4px 6px -1px hsl(0 0% 0% / 0.4), 0 2px 4px -1px hsl(0 0% 0% / 0.3);
+    --shadow-neon: 0 0 10px hsl(180 100% 50% / 0.6), 0 0 20px hsl(180 100% 50% / 0.4);
   }
 }
 
